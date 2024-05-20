@@ -8,7 +8,7 @@ use core::cell::RefCell;
 pub struct ClientStream {
     pub stream_write: Mutex<Option<TcpStream>>,
     pub addr: SocketAddr,
-    pub(crate) stream_read: RefCell<Option<TcpStream>>,
+    pub(crate) stream_read: RefCell<Option<TcpStream>>, //pub(crate) makes an item visible within the current crate
 }
 
 impl ClientStream {

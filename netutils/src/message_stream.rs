@@ -150,7 +150,7 @@ fn decode_msginfo(bytes: &[u8]) -> Result<MsgInfo, MsgError> {
 pub fn parse_msgstream(buffer: &[u8]) -> Result<Option<MsgStream>, MsgError> {
     let sz = match msg_size(&buffer) {
         Ok(sz) => sz,
-        Err(MsgError::DataSizeTooSmall { min_size }) => return Ok(None),
+        Err(MsgError::DataSizeTooSmall { min_size: _ }) => return Ok(None),
         Err(e) => return Err(e),
     } + size_of::<u32>() as u32; //for size
 
@@ -171,4 +171,21 @@ pub fn parse_msgstream(buffer: &[u8]) -> Result<Option<MsgStream>, MsgError> {
 
     let msgstream = MsgStream::new(msginfo, &buffer[newmsg_start..]);
     Ok(Some(msgstream))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_msgstream_valid() {
+        let data = "abc".as_bytes();
+        let buffer = serialize_data(1u32, data).unwrap();
+        println!("{:?}", buffer);
+
+        let msgstream = parse_msgstream(&buffer).unwrap().unwrap();
+        let decode_data = msgstream.msginfo.decode_data::<&[u8]>().unwrap();
+        assert_eq!(msgstream.msginfo.code, 1u32);
+        assert_eq!(decode_data, data);
+    }
 }
